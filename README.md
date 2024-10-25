@@ -10,7 +10,7 @@
 - Regist with Google
 - Submit Code
   ```
-  5147WQ
+  GDQHM5
   ```
 - Deposit $1 to ETH BASE, just not too much.
 - Make 5,000 transactions to earn 300/hour (to unlock cards and get points).
