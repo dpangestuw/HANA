@@ -15,7 +15,6 @@ print(Fore.CYAN + Style.BRIGHT + """██║  ██║██████╔╝
 print(Fore.CYAN + Style.BRIGHT + """╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝     ╚═╝╚═╝╚═════╝ ╚═╝  ╚═══╝""" + Style.RESET_ALL)
 print(Fore.CYAN + Style.BRIGHT + """   Auto Deposit ETH for HANA Network x t.me/dpangestuw""" + Style.RESET_ALL)
 
-# Refresh access token
 def refresh_access_token(refresh_token):
     url = f"https://securetoken.googleapis.com/v1/token?key=AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
 
@@ -36,14 +35,12 @@ def refresh_access_token(refresh_token):
 
     return response.json()
 
-# Validate transaction hash
 def validate_tx_hash(tx_hash):
     if not isinstance(tx_hash, str) or not tx_hash.startswith('0x') or len(tx_hash) != 66:
         raise ValueError(f"Invalid transaction hash format: {tx_hash}")
     if any(c not in '0123456789abcdefABCDEF' for c in tx_hash[2:]):
         raise ValueError(f"Transaction hash contains invalid characters: {tx_hash}")
 
-# Function to sync transaction
 def sync_transaction(tx_hash, chain_id, access_token):
     url = "https://hanafuda-backend-app-520478841386.us-central1.run.app/graphql"
     query = """
@@ -65,7 +62,6 @@ def sync_transaction(tx_hash, chain_id, access_token):
         raise Exception(f"Failed to sync transaction: {response.json()}")
     return response.json()
 
-# Load the refresh token from file
 def load_refresh_token_from_file():
     try:
         with open("tokens.json", "r") as token_file:
@@ -79,7 +75,6 @@ def load_refresh_token_from_file():
         logging.error("Error decoding JSON from 'tokens.json'.")
         exit()
 
-# Main script setup
 RPC_URL = "https://mainnet.base.org"
 CONTRACT_ADDRESS = "0xC5bf05cD32a14BFfb705Fb37a9d218895187376c"
 AMOUNT_ETH = 0.0000000001
@@ -106,13 +101,11 @@ contract_abi = '''
 amount_wei = web3.to_wei(AMOUNT_ETH, 'ether')
 contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=json.loads(contract_abi))
 
-# Track the nonces for each key
 nonces = {key: web3.eth.get_transaction_count(web3.eth.account.from_key(key).address) for key in private_keys}
 tx_count = 0
 
 chain_id = 8453
 
-# Load refresh token
 refresh_token = load_refresh_token_from_file()
 
 for i in range(num_transactions):
@@ -121,7 +114,6 @@ for i in range(num_transactions):
         short_from_address = from_address[:4] + "..." + from_address[-4:]
 
         try:
-            # Refresh access token
             access_token_info = refresh_access_token(refresh_token)
             access_token = access_token_info["access_token"]
             refresh_token = access_token_info.get("refresh_token", refresh_token)
@@ -137,33 +129,24 @@ for i in range(num_transactions):
             signed_txn = web3.eth.account.sign_transaction(transaction, private_key=private_key)
             tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
 
-            # Wait for transaction receipt
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
 
-            # Get the transaction hash in hex format
             tx_hash_hex = tx_receipt['transactionHash'].hex()
             print(Fore.GREEN + f"Transaction {i + 1} sent from {short_from_address} with hash: {tx_hash_hex}")
 
-            # Ensure the transaction hash is prefixed with '0x'
             if not tx_hash_hex.startswith('0x'):
                 tx_hash_hex = '0x' + tx_hash_hex
-
-            # Validate the transaction hash before syncing
             validate_tx_hash(tx_hash_hex)
 
-            # Print the hash for debugging
             print(Fore.YELLOW + f"Syncing transaction with hash: {tx_hash_hex}", end='\r')
 
-            # Sync the transaction
             sync_response = sync_transaction(tx_hash_hex, chain_id, access_token)
 
-            # Check if the sync was successful
             if sync_response.get('data', {}).get('syncEthereumTx'):
                 print(Fore.CYAN + f"Sync {short_from_address} successful with hash: {tx_hash_hex}")
             else:
                 print(Fore.RED + "Sync failed!")
 
-            # Increment nonce and transaction counter
             nonces[private_key] += 1
             tx_count += 1
 
