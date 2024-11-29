@@ -9,6 +9,7 @@
 **Support Multi Account** 
 - Register here : https://hanafuda.hana.network/dashboard
 - Regist with Google
+- Input Code **5147WQ**
 - Deposit $1 to **ETH BASE**, just not too much.
 - Make 5,000 transactions to earn 300 grow/hour.
 - Make 10,000 transactions to earn 643 Garden Rewards boxes.
