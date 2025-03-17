@@ -16,8 +16,6 @@
 - **growmulti** = to choose cards and get points.
 - **drawmulti** = to unlock collection cards
 
-[**Get License**](https://t.me/Laporan_Sayang_bot)
-
 ## Instalation
 ```bash
 git clone https://github.com/dpangestuw/HANA.git
