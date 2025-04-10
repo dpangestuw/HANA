@@ -55,7 +55,7 @@ def print_warning(message):
 
 def load_tokens_from_file():
     try:
-        with open("tokens1.json", "r") as token_file:
+        with open("tokens.json", "r") as token_file:
             return json.load(token_file)
     except FileNotFoundError:
         logging.error("File 'tokens.json' not found.")
