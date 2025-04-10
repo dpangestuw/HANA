@@ -7,16 +7,13 @@ from colorama import init, Fore, Style
 
 init(autoreset=True)
 
-print(Fore.CYAN + Style.BRIGHT + """ █████╗ ██████╗ ███████╗███╗   ███╗██╗██████╗ ███╗   ██╗""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """██╔══██╗██╔══██╗██╔════╝████╗ ████║██║██╔══██╗████╗  ██║""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """███████║██║  ██║█████╗  ██╔████╔██║██║██║  ██║██╔██╗ ██║""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """██╔══██║██║  ██║██╔══╝  ██║╚██╔╝██║██║██║  ██║██║╚██╗██║""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """██║  ██║██████╔╝██║     ██║ ╚═╝ ██║██║██████╔╝██║ ╚████║""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝     ╚═╝╚═╝╚═════╝ ╚═╝  ╚═══╝""" + Style.RESET_ALL)
-print(Fore.CYAN + Style.BRIGHT + """   Auto Deposit ETH for HANA Network x t.me/dpangestuw""" + Style.RESET_ALL)
+print(Fore.CYAN + Style.BRIGHT + """t.me/dpangestuw""" + Style.RESET_ALL)
+print(Fore.CYAN + Style.BRIGHT + """Auto Deposit Multi Network for HANAFUDA""" + Style.RESET_ALL)
+print()
 
 def refresh_access_token(refresh_token):
-    url = f"https://securetoken.googleapis.com/v1/token?key=AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
+    api_key = "AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
+    url = f"https://securetoken.googleapis.com/v1/token?key={api_key}"
 
     headers = {
         "Content-Type": "application/json",
@@ -64,7 +61,7 @@ def sync_transaction(tx_hash, chain_id, access_token):
 
 def load_refresh_token_from_file():
     try:
-        with open("tokens.json", "r") as token_file:
+        with open("tokens2.json", "r") as token_file:
             tokens = json.load(token_file)
             return tokens[0].get("refresh_token")
     except FileNotFoundError:
@@ -75,11 +72,35 @@ def load_refresh_token_from_file():
         logging.error("Error decoding JSON from 'tokens.json'.")
         exit()
 
-RPC_URL = "https://mainnet.base.org"
-CONTRACT_ADDRESS = "0xC5bf05cD32a14BFfb705Fb37a9d218895187376c"
-AMOUNT_ETH = 0.0000000001
+def select_chain():
+    print(Fore.YELLOW + Style.BRIGHT + "Select the blockchain network:" + Style.RESET_ALL)
+    print(Fore.GREEN + "1. Base Mainnet" + Style.RESET_ALL)
+    print(Fore.GREEN + "2. OP Mainnet" + Style.RESET_ALL)
+    print(Fore.GREEN + "3. Blast Mainnet" + Style.RESET_ALL)
+    print()
+    choice = input(Fore.YELLOW + "Enter the number for your choice: " + Style.RESET_ALL)
+
+    if choice == '1':
+        rpc_url = "https://base-mainnet.public.blastapi.io"
+        contact_address = "0xC5bf05cD32a14BFfb705Fb37a9d218895187376c" 
+    elif choice == '2':
+        rpc_url = "https://mainnet.optimism.io"
+        contact_address = "0xC5bf05cD32a14BFfb705Fb37a9d218895187376c" 
+    elif choice == '3':
+        rpc_url = "https://rpc.ankr.com/blast"
+        contact_address = "0x56Eff3c3F7bDdb4a58c7241b7695a72762D01baE" 
+    else:
+        print(Fore.RED + "Invalid choice. Exiting..." + Style.RESET_ALL)
+        exit()
+
+    return rpc_url, contact_address
+
+RPC_URL, CONTACT_ADDRESS = select_chain()  
 
 web3 = Web3(Web3.HTTPProvider(RPC_URL))
+chain_id = web3.eth.chain_id
+amount = 0.000000000000000001
+value_in_wei = web3.to_wei(amount, 'ether')
 
 num_transactions = int(input(Fore.YELLOW + "Enter the number of transactions to be executed: " + Style.RESET_ALL))
 
@@ -98,13 +119,10 @@ contract_abi = '''
 ]
 '''
 
-amount_wei = web3.to_wei(AMOUNT_ETH, 'ether')
-contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=json.loads(contract_abi))
+contract = web3.eth.contract(address=CONTACT_ADDRESS, abi=json.loads(contract_abi))
 
 nonces = {key: web3.eth.get_transaction_count(web3.eth.account.from_key(key).address) for key in private_keys}
 tx_count = 0
-
-chain_id = 8453
 
 refresh_token = load_refresh_token_from_file()
 
@@ -120,7 +138,7 @@ for i in range(num_transactions):
 
             transaction = contract.functions.depositETH().build_transaction({
                 'from': from_address,
-                'value': amount_wei,
+                'value': value_in_wei,
                 'gas': 50000,
                 'gasPrice': web3.eth.gas_price,
                 'nonce': nonces[private_key],
@@ -128,14 +146,13 @@ for i in range(num_transactions):
 
             signed_txn = web3.eth.account.sign_transaction(transaction, private_key=private_key)
             tx_hash = web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-
             tx_hash_hex = tx_receipt['transactionHash'].hex()
             print(Fore.GREEN + f"Transaction {i + 1} sent from {short_from_address} with hash: {tx_hash_hex}")
 
             if not tx_hash_hex.startswith('0x'):
                 tx_hash_hex = '0x' + tx_hash_hex
+
             validate_tx_hash(tx_hash_hex)
 
             print(Fore.YELLOW + f"Syncing transaction with hash: {tx_hash_hex}", end='\r')
@@ -146,7 +163,6 @@ for i in range(num_transactions):
                 print(Fore.CYAN + f"Sync {short_from_address} successful with hash: {tx_hash_hex}")
             else:
                 print(Fore.RED + "Sync failed!")
-
             nonces[private_key] += 1
             tx_count += 1
 
