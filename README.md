@@ -1,6 +1,6 @@
 # Auto Deposit ETH, Grow, and Draw Hanafuda for HANA Network 
 
-<img width="300" alt="image" src="https://github.com/user-attachments/assets/90dc4730-188d-4f64-b3ea-8fedc1400dff" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/90dc4730-188d-4f64-b3ea-8fedc1400dff" />
 <img height="300" alt="Screenshot 2024-11-17 at 06 06 43" src="https://github.com/user-attachments/assets/d126ec9d-9f09-41ac-a298-c1d36dba953d">
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/ef5586f1-5602-4674-9f4a-2a176072b0c7">
 
