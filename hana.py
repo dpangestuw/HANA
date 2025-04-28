@@ -61,7 +61,7 @@ def sync_transaction(tx_hash, chain_id, access_token):
 
 def load_refresh_token_from_file():
     try:
-        with open("tokens2.json", "r") as token_file:
+        with open("tokens.json", "r") as token_file:
             tokens = json.load(token_file)
             return tokens[0].get("refresh_token")
     except FileNotFoundError:
